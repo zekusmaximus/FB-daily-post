@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Social Media Publisher - Automated Facebook Posting</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fab fa-facebook-square"></i>
+                    <h1>Social Media Publisher</h1>
+                </div>
+                <p class="subtitle">Automated daily Facebook posting with AI-generated content</p>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Configuration Section -->
+            <section class="card settings-card">
+                <div class="card-header">
+                    <h2><i class="fas fa-cog"></i> Configuration</h2>
+                    <p>Set up your API keys and posting preferences</p>
+                </div>
+                
+                <form id="settingsForm" class="settings-form">
+                    <div class="form-group">
+                        <label for="openaiApiKey">
+                            <i class="fas fa-brain"></i>
+                            OpenAI API Key
+                            <span class="required">*</span>
+                        </label>
+                        <input type="password" id="openaiApiKey" name="openaiApiKey" 
+                               placeholder="sk-..." required>
+                        <small class="help-text">Used for generating quotes and images</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="facebookAccessToken">
+                            <i class="fab fa-facebook"></i>
+                            Facebook Page Access Token
+                            <span class="required">*</span>
+                        </label>
+                        <input type="password" id="facebookAccessToken" name="facebookAccessToken" 
+                               placeholder="EAABwzLixnjYBO..." required>
+                        <small class="help-text">Token with pages_manage_posts permission</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="notificationEmail">
+                            <i class="fas fa-envelope"></i>
+                            Notification Email
+                        </label>
+                        <input type="email" id="notificationEmail" name="notificationEmail" 
+                               placeholder="your-email@example.com">
+                        <small class="help-text">Receive alerts when posting fails</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="prompt">
+                            <i class="fas fa-quote-left"></i>
+                            Quote Generation Prompt
+                        </label>
+                        <textarea id="prompt" name="prompt" rows="4" 
+                                  placeholder="Generate an inspiring daily quote about success, motivation, or personal growth..."></textarea>
+                        <small class="help-text">Customize the type of quotes to generate</small>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary" id="saveBtn">
+                            <i class="fas fa-save"></i>
+                            <span>Save Settings</span>
+                            <div class="spinner" id="saveSpinner"></div>
+                        </button>
+                        
+                        <button type="button" class="btn btn-secondary" id="testBtn">
+                            <i class="fas fa-play"></i>
+                            <span>Test Post</span>
+                            <div class="spinner" id="testSpinner"></div>
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- Status Section -->
+            <section class="card status-card">
+                <div class="card-header">
+                    <h2><i class="fas fa-chart-line"></i> Status & Activity</h2>
+                    <p>Monitor your automated posting activity</p>
+                </div>
+
+                <div class="status-content">
+                    <div class="status-grid">
+                        <div class="status-item">
+                            <div class="status-icon success">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div class="status-info">
+                                <h3>Last Successful Post</h3>
+                                <p id="lastPostTime">Never</p>
+                            </div>
+                        </div>
+
+                        <div class="status-item">
+                            <div class="status-icon info">
+                                <i class="fas fa-server"></i>
+                            </div>
+                            <div class="status-info">
+                                <h3>Server Status</h3>
+                                <p id="serverStatus">Connected</p>
+                            </div>
+                        </div>
+
+                        <div class="status-item">
+                            <div class="status-icon warning">
+                                <i class="fas fa-key"></i>
+                            </div>
+                            <div class="status-info">
+                                <h3>Configuration</h3>
+                                <p id="configStatus">Incomplete</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="activity-log">
+                        <h3><i class="fas fa-list"></i> Recent Activity</h3>
+                        <div id="activityList" class="activity-list">
+                            <div class="activity-item placeholder">
+                                <i class="fas fa-info-circle"></i>
+                                <span>No activity yet</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <p>Processing...</p>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
+

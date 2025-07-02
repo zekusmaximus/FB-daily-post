@@ -1,0 +1,157 @@
+🧠 AI Agent Prompt: Automated Daily Social Media Publisher
+
+Persona: You are an expert full-stack AI developer. Your task is to create a complete, production-ready web application based on the following detailed specifications.
+
+Project Overview:
+Create a "set-it-and-forget-it" web application that allows a user to automate daily posts to a Facebook Page. The application will consist of a simple front-end for configuration and a lightweight back-end (using Node.js with Express) to handle secure key storage, scheduling, and all API interactions.
+
+Part 1: Back-End Requirements (Node.js & Express)
+The back-end is the core of the automation and must handle all sensitive operations.
+
+1. Server & API:
+
+Set up a basic Express server.
+
+Create API endpoints for the front-end to:
+
+POST /api/settings: Save the user's OpenAI API Key, Facebook Page Access Token, and quote-generation prompt.
+
+GET /api/settings: Retrieve the currently saved prompt to display on the front-end (do NOT send API keys back to the client).
+
+POST /api/test: Manually trigger a single run of the full posting workflow for testing purposes.
+
+GET /api/status: Provide status information like the last successful post timestamp and the last 10 entries in the activity log.
+
+2. Security:
+
+All API keys (OpenAI, Facebook) and other secrets must be stored in a .env file and loaded using a library like dotenv.
+
+Never expose API keys on the client-side or in any front-end-facing API responses.
+
+3. Automation & Scheduling:
+
+Use a reliable scheduling library like node-cron to run the content generation and posting workflow once every 24 hours.
+
+The workflow is as follows:
+
+Read the saved prompt from the configuration file.
+
+Call the OpenAI Chat Completions API to generate a quote.
+
+Use the generated quote to call the OpenAI Image Generations API (DALL-E 3) to create a relevant image.
+
+Post the generated quote text and the image URL to the user's Facebook Page using the Facebook Graph API.
+
+Log the result (success or failure) to the activity log.
+
+4. OpenAI & Facebook API Integration:
+
+Quote Generation (GPT-4):
+
+JavaScript
+
+// server.js
+const response = await fetch('https://api.openai.com/v1/chat/completions', {
+  method: 'POST',
+  headers: { 'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`, 'Content-Type': 'application/json' },
+  body: JSON.stringify({ model: 'gpt-4', messages: [{ role: 'user', content: savedPrompt }], max_tokens: 150 })
+});
+Image Generation (DALL-E 3):
+
+JavaScript
+
+// server.js
+const imageResponse = await fetch('https://api.openai.com/v1/images/generations', {
+  method: 'POST',
+  headers: { 'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`, 'Content-Type': 'application/json' },
+  body: JSON.stringify({ model: 'dall-e-3', prompt: `An artistic, high-quality image inspired by the quote: "${generatedQuote}"`, n: 1, size: '1024x1024', quality: 'hd' })
+});
+Facebook Posting (Graph API):
+
+JavaScript
+
+// server.js
+const fbResponse = await fetch(`https://graph.facebook.com/v18.0/me/photos?url=${imageUrlFromDalle}&message=${generatedQuote}`, {
+  method: 'POST',
+  headers: { 'Authorization': `Bearer ${process.env.FACEBOOK_ACCESS_TOKEN}` }
+});
+5. Error Handling & Logging:
+
+Implement comprehensive error handling for all API calls (OpenAI, Facebook).
+
+Use a retry mechanism (e.g., attempt a failing API call up to 3 times with exponential backoff).
+
+Create a simple logging system. Store an activity-log.json file containing the last 10 events, each with a timestamp, status (SUCCESS or ERROR), and message.
+
+If the Facebook post fails, an email alert should be sent to a user-configurable email address (use a library like Nodemailer and add SMTP credentials to the .env file).
+
+Part 2: Front-End Requirements (HTML, CSS, Vanilla JS)
+The front-end is the user's control panel. It should be a clean, intuitive single-page application that communicates with the back-end.
+
+1. Configuration Interface:
+
+A clean, card-based settings panel with the following inputs:
+
+OpenAI API Key: password type input.
+
+Facebook Page Access Token: password type input.
+
+Notification Email: email type input for failure alerts.
+
+Quote Generation Prompt: A textarea (min 4 rows) for the user's custom prompt.
+
+A "Save Settings" button that sends the configuration to the back-end /api/settings endpoint.
+
+A "Test Post" button that triggers the back-end /api/test endpoint.
+
+2. Status Display:
+
+A dedicated section to display status information fetched from /api/status.
+
+Show the "Last Successful Post" timestamp.
+
+Display the "Activity Log" of the last 10 posts with their timestamps and statuses.
+
+3. UI/UX Design:
+
+Use a modern, responsive design that works on both desktop and mobile.
+
+Layout: Use Flexbox or CSS Grid for a clean, centered layout.
+
+Color Scheme: Use a neutral white/light gray background with a professional blue accent color (e.g., #1877f2 for Facebook brand consistency).
+
+User Feedback:
+
+Show loading spinners/states when the "Save" or "Test" buttons are clicked and waiting for a response from the server.
+
+Use toast notifications (small pop-ups) to indicate success ("Settings Saved!") or failure ("Failed to connect to server.").
+
+Part 3: Project Structure & Deliverables
+Generate the complete, working codebase in modular files as specified below.
+
+1. Project File Structure:
+
+/project-root
+  ├── public/
+  │   ├── index.html
+  │   ├── style.css
+  │   └── app.js          # Client-side JavaScript
+  ├── server.js           # Main Express server, API endpoints, scheduler
+  ├── .env.example        # Example environment file
+  ├── package.json
+  └── README.md
+2. README.md File:
+
+Provide clear, step-by-step instructions on:
+
+How to obtain an OpenAI API Key.
+
+How to obtain a Facebook Page Access Token with the required pages_manage_posts permission.
+
+How to set up SMTP credentials for email alerts.
+
+How to run the application locally (npm install, npm start).
+
+Recommended hosting solutions that support a persistent Node.js process (e.g., Render, Heroku, or a VPS).
+
+The final deliverable should be a production-ready application that requires only user credentials and a server environment to become fully operational.
