@@ -6,6 +6,9 @@ const cron = require('node-cron');
 const nodemailer = require('nodemailer');
 require('dotenv').config();
 
+// Add express-basic-auth for simple HTTP authentication
+const basicAuth = require('express-basic-auth');
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -20,10 +23,10 @@ const ACTIVITY_LOG_FILE = path.join(__dirname, 'activity-log.json');
 
 // Global configuration storage
 let appConfig = {
-  openaiApiKey: '',
-  facebookAccessToken: '',
-  notificationEmail: '',
-  prompt: 'Generate an inspiring daily quote about success, motivation, or personal growth. Keep it under 200 characters and make it engaging for social media.'
+  openaiApiKey: process.env.OPENAI_API_KEY || '',
+  facebookAccessToken: process.env.FACEBOOK_ACCESS_TOKEN || '',
+  notificationEmail: process.env.NOTIFICATION_EMAIL || '',
+  prompt: process.env.QUOTE_PROMPT || 'Generate an inspiring daily quote about success, motivation, or personal growth. Keep it under 200 characters and make it engaging for social media.'
 };
 
 // Activity log storage
@@ -318,11 +321,11 @@ app.post('/api/settings', async (req, res) => {
       });
     }
 
-    // Update configuration (only store if provided)
-    if (openaiApiKey) appConfig.openaiApiKey = openaiApiKey;
-    if (facebookAccessToken) appConfig.facebookAccessToken = facebookAccessToken;
-    if (notificationEmail) appConfig.notificationEmail = notificationEmail;
-    if (prompt) appConfig.prompt = prompt;
+    // Update configuration (only store if provided and not set in env)
+    if (openaiApiKey && !process.env.OPENAI_API_KEY) appConfig.openaiApiKey = openaiApiKey;
+    if (facebookAccessToken && !process.env.FACEBOOK_ACCESS_TOKEN) appConfig.facebookAccessToken = facebookAccessToken;
+    if (notificationEmail && !process.env.NOTIFICATION_EMAIL) appConfig.notificationEmail = notificationEmail;
+    if (prompt && !process.env.QUOTE_PROMPT) appConfig.prompt = prompt;
 
     // Save to file
     await saveConfig();
@@ -433,6 +436,16 @@ app.get('/health', (req, res) => {
     timestamp: new Date().toISOString(),
     uptime: process.uptime()
   });
+});
+
+// Basic authentication middleware (skip for /health)
+app.use((req, res, next) => {
+  if (req.path === '/health') return next();
+  return basicAuth({
+    users: { [process.env.BASIC_AUTH_USER]: process.env.BASIC_AUTH_PASS },
+    challenge: true,
+    unauthorizedResponse: 'Unauthorized'
+  })(req, res, next);
 });
 
 // Error handling middleware

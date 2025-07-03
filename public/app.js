@@ -60,17 +60,11 @@ async function handleSettingsSubmit(event) {
     
     const formData = new FormData(elements.settingsForm);
     const settings = {
-        openaiApiKey: formData.get('openaiApiKey'),
-        facebookAccessToken: formData.get('facebookAccessToken'),
         notificationEmail: formData.get('notificationEmail'),
         prompt: formData.get('prompt')
     };
     
-    // Validate required fields
-    if (!settings.openaiApiKey || !settings.facebookAccessToken) {
-        showToast('Please fill in all required fields', 'error');
-        return;
-    }
+    // No required fields for API keys anymore
     
     setLoadingState(elements.saveBtn, elements.saveSpinner, true);
     
@@ -189,13 +183,9 @@ function updateStatusDisplay(status) {
     elements.serverStatus.textContent = 'Connected';
     
     // Update configuration status
-    const configComplete = status.configurationStatus.hasOpenaiKey && 
-                           status.configurationStatus.hasFacebookToken;
-    elements.configStatus.textContent = configComplete ? 'Complete' : 'Incomplete';
-    
-    // Update configuration status icon
+    elements.configStatus.textContent = 'Protected';
     const configStatusItem = elements.configStatus.parentElement.parentElement;
-    configStatusItem.className = configComplete ? 'status-item success' : 'status-item warning';
+    configStatusItem.className = 'status-item success';
     
     // Update activity log
     updateActivityLog(status.activityLog);
@@ -255,14 +245,8 @@ function formatDateTime(date) {
 
 // Validate Form
 function validateForm() {
-    const openaiKey = document.getElementById('openaiApiKey').value;
-    const facebookToken = document.getElementById('facebookAccessToken').value;
-    
-    const isValid = openaiKey.length > 0 && facebookToken.length > 0;
-    
-    elements.testBtn.disabled = !isValid;
-    
-    return isValid;
+    // No required fields for API keys anymore
+    elements.saveBtn.disabled = false;
 }
 
 // Set Loading State
