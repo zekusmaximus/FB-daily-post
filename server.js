@@ -13,6 +13,15 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Middleware
+app.use((req, res, next) => {
+  if (req.path === '/health') return next();
+  return basicAuth({
+    users: { [process.env.BASIC_AUTH_USER]: process.env.BASIC_AUTH_PASS },
+    challenge: true,
+    unauthorizedResponse: 'Unauthorized'
+  })(req, res, next);
+});
+
 app.use(cors());
 app.use(express.json());
 app.use(express.static('public'));
@@ -311,36 +320,31 @@ async function sendEmailNotification(subject, message) {
 // POST /api/settings - Save user configuration
 app.post('/api/settings', async (req, res) => {
   try {
-    const { openaiApiKey, facebookAccessToken, notificationEmail, prompt } = req.body;
+    const { prompt } = req.body;
 
-    // Validate required fields
-    if (!openaiApiKey || !facebookAccessToken) {
+    if (!prompt) {
       return res.status(400).json({ 
-        error: 'Missing required fields',
-        message: 'OpenAI API Key and Facebook Access Token are required'
+        error: 'Missing required field',
+        message: 'Prompt is required'
       });
     }
 
-    // Update configuration (only store if provided and not set in env)
-    if (openaiApiKey && !process.env.OPENAI_API_KEY) appConfig.openaiApiKey = openaiApiKey;
-    if (facebookAccessToken && !process.env.FACEBOOK_ACCESS_TOKEN) appConfig.facebookAccessToken = facebookAccessToken;
-    if (notificationEmail && !process.env.NOTIFICATION_EMAIL) appConfig.notificationEmail = notificationEmail;
-    if (prompt && !process.env.QUOTE_PROMPT) appConfig.prompt = prompt;
+    appConfig.prompt = prompt;
 
     // Save to file
     await saveConfig();
-    await addLogEntry('SUCCESS', 'Configuration updated successfully');
+    await addLogEntry('SUCCESS', 'Prompt updated successfully');
 
     res.json({ 
       success: true,
-      message: 'Settings saved successfully'
+      message: 'Prompt saved successfully'
     });
 
   } catch (error) {
-    console.error('Error saving settings:', error);
-    await addLogEntry('ERROR', `Failed to save settings: ${error.message}`);
+    console.error('Error saving prompt:', error);
+    await addLogEntry('ERROR', `Failed to save prompt: ${error.message}`);
     res.status(500).json({ 
-      error: 'Failed to save settings',
+      error: 'Failed to save prompt',
       message: error.message
     });
   }
@@ -436,16 +440,6 @@ app.get('/health', (req, res) => {
     timestamp: new Date().toISOString(),
     uptime: process.uptime()
   });
-});
-
-// Basic authentication middleware (skip for /health)
-app.use((req, res, next) => {
-  if (req.path === '/health') return next();
-  return basicAuth({
-    users: { [process.env.BASIC_AUTH_USER]: process.env.BASIC_AUTH_PASS },
-    challenge: true,
-    unauthorizedResponse: 'Unauthorized'
-  })(req, res, next);
 });
 
 // Error handling middleware

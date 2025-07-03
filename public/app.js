@@ -60,11 +60,8 @@ async function handleSettingsSubmit(event) {
     
     const formData = new FormData(elements.settingsForm);
     const settings = {
-        notificationEmail: formData.get('notificationEmail'),
         prompt: formData.get('prompt')
     };
-    
-    // No required fields for API keys anymore
     
     setLoadingState(elements.saveBtn, elements.saveSpinner, true);
     
@@ -137,10 +134,6 @@ async function loadSettings() {
             if (settings.prompt) {
                 document.getElementById('prompt').value = settings.prompt;
             }
-            if (settings.notificationEmail) {
-                document.getElementById('notificationEmail').value = settings.notificationEmail;
-            }
-            
             appState.settings = settings;
             validateForm();
         }
