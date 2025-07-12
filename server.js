@@ -134,7 +134,7 @@ async function generateQuote(prompt) {
 // Generate image using OpenAI DALL-E 3 API
 async function generateImage(quote) {
   try {
-    const imagePrompt = `An artistic, high-quality image inspired by the quote: "${quote}". Create a visually appealing, inspirational image suitable for social media posting.`;
+    const imagePrompt = `An artistic, high-quality image with no text inspired by the quote: "${quote}". Create a visually appealing, inspirational image suitable for social media posting.`;
     
     const response = await fetch('https://api.openai.com/v1/images/generations', {
       method: 'POST',
